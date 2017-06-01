@@ -1,0 +1,2 @@
+# airscript
+simple js dialect 
