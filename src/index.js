@@ -4,8 +4,11 @@ const fs = require('fs')
 const path = require('path')
 const config = require('../config.json')
 
-promisify(fs.readFile)(path.resolve('./' + config.source.folder + '/' + config.source.index), 'utf8')
-  .then((text) => core(text))
+const readFileAsync = promisify(fs.readFile)
+const writeFileAsync = promisify(fs.writeFile)
+
+readFileAsync(path.resolve('./' + config.source.folder + '/' + config.source.index), 'utf8')
+  .then((text) => core(text, true))
   .then(data => data.toJS())
   .then(text => {
     console.log(text)
@@ -26,7 +29,7 @@ promisify(fs.readFile)(path.resolve('./' + config.source.folder + '/' + config.s
     })
   })
   .then(text => {
-    return promisify(fs.writeFile)(path.resolve('./' + config.target.folder + '/' + config.target.index), text, 'utf8')
+    return writeFileAsync(path.resolve('./' + config.target.folder + '/' + config.target.index), text, 'utf8')
   })
   .catch(err => {
     console.error(err)

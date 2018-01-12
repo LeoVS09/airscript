@@ -1,3 +1,8 @@
+const StateMachine = require('./StateMachine')
+const resolve = require('./resolve')
+const constants = require('./tokens')
+const buildSyntaxTree = require('./buildSyntaxTree')
+
 let DEBUG = true
 
 console.debug = (...args) => {
@@ -13,92 +18,6 @@ const reserved = {
 
     }
   }
-}
-
-// parse string and find count tabs or spaces on start, all words, and empty bool
-function resolve (string) {
-
-  let words = []
-  let current = ''
-  let tabs = 0
-  let strategy = 'START'
-  let isEmpty = true
-  let isString = false
-  let stringSymbol = ''
-
-  if (string.length === 0)
-    return {tabs, words, isEmpty}
-
-  string.split('').forEach(item => {
-    if (item === '\r') {
-      return
-    }
-
-    //console.debug('resolve strategy: ', strategy)
-
-    if (strategy === 'START') {
-      if (item === ' ' || item === '\t') {
-        tabs++
-      } else {
-        current += item
-        if (item === '\'' || item === '\"' || item === '`') {
-          stringSymbol = item
-          strategy = 'STRING'
-        } else {
-          strategy = 'WORD'
-        }
-      }
-      return
-    }
-
-    if (strategy === 'DEFAULT') {
-      if (item !== ' ') {
-        current += item
-        if (item === '\'' || item === '\"' || item === '`') {
-          stringSymbol = item
-          strategy = 'STRING'
-        } else {
-          strategy = 'WORD'
-        }
-      }
-      return
-    }
-
-    if (strategy === 'STRING') {
-      current += item
-      if (item === stringSymbol) {
-        words.push(current)
-        current = ''
-        strategy = 'DEFAULT'
-      }
-      return
-    }
-
-    if (strategy === 'WORD') {
-      if (item === ' ') {
-        words.push(current)
-        current = ''
-        strategy = 'DEFAULT'
-      } else {
-        current += item
-      }
-      //console.debug('resolve word: ', item, ' current: ', current)
-      return
-    }
-
-  })
-
-  if (strategy === 'WORD') {
-    words.push(current)
-    current = ''
-  }
-
-  if (strategy === 'START')
-    isEmpty = true
-  else
-    isEmpty = false
-
-  return {tabs, words, isEmpty}
 }
 
 const checks = [
@@ -139,9 +58,6 @@ function understand (value) {
   return result
 }
 
-const INCREASE_NESTING = {key: 'INCREASE_NESTING'}
-const DECREASE_NESTING = {key: 'DECREASE_NESTING'}
-const END_LINE = {key: 'END_LINE'}
 
 function buildTokens (strings) {
   let tokens = []
@@ -156,9 +72,9 @@ function buildTokens (strings) {
     .filter(result => !result.isEmpty)
     .forEach(({tabs, words}) => {
       if (tabs > lastTabs)
-        tokens.push(INCREASE_NESTING)
+        tokens.push(constants.INCREASE_NESTING)
       else if (tabs < lastTabs)
-        tokens.push(DECREASE_NESTING)
+        tokens.push(constants.DECREASE_NESTING)
 
       lastTabs = tabs
 
@@ -171,110 +87,11 @@ function buildTokens (strings) {
         }
       })
 
-      tokens.push(END_LINE)
+      tokens.push(constants.END_LINE)
     })
 
   return tokens
 }
-
-function defaultStrategy () {
-
-}
-
-function groupBy (arr, keySelector) {
-  let dict = {}
-
-  arr.forEach((el, i) => {
-    let key = keySelector(el, i)
-    if (dict[key])
-      dict[key].push(el)
-    else
-      dict[key] = [el]
-  })
-
-  return dict
-}
-
-function buildSyntaxTree (tokens) {
-
-  let lastTab = 0
-  let tabsCount = 0
-  let tree = []
-
-  let strategy = 'DEFAULT'
-  let branch = {}
-  let current = {}
-
-  tokens.forEach(token => {
-    if (strategy === 'DEFAULT') {
-      if (token.key === 'VARIABLE') {
-        strategy = 'VARIABLE'
-        branch = {key: 'VARIABLE'}
-      }
-      return
-    }
-
-    if (strategy === 'VARIABLE') {
-      if (token.key === 'WORD') {
-        strategy = 'VALUE'
-        branch.value = token.value
-      }
-      return
-    }
-
-    if (strategy === 'VALUE') {
-      if (token === END_LINE) {
-        strategy = 'VALUE_OBJECT'
-        branch.fields = []
-        branch.type = 'OBJECT'
-      }
-      return
-    }
-
-    if (strategy === 'VALUE_OBJECT') {
-      if (token === INCREASE_NESTING) {
-        strategy = 'VALUE_OBJECT_NAME'
-      }
-      return
-    }
-
-    if (strategy === 'VALUE_OBJECT_NAME') {
-      if (token.key === 'WORD') {
-        current = {key: token.value}
-        strategy = 'VALUE_OBJECT_VALUE'
-      }
-      if (token === DECREASE_NESTING) {
-        tree.push(branch)
-        branch = {}
-        strategy = 'DEFAULT'
-      }
-      return
-    }
-
-    if (strategy === 'VALUE_OBJECT_VALUE') {
-      current.value = token.value
-      current.type = token.key
-      branch.fields.push(current)
-      current = {}
-      strategy = 'WAIT_NEXT_FIELD'
-      return
-    }
-
-    if (strategy === 'WAIT_NEXT_FIELD') {
-      if (token === END_LINE) {
-        strategy = 'VALUE_OBJECT_NAME'
-      }
-      return
-    }
-  })
-  if (strategy === 'WAIT_NEXT_FIELD' || strategy === 'VALUE_OBJECT_NAME') {
-    tree.push(branch)
-  }
-
-  return tree
-}
-
-const logic = {}
 
 function rollUpTree (tree) {
   let result = ''
@@ -303,8 +120,7 @@ function parse (strings) {
   let tree = buildSyntaxTree(tokens)
   console.debug('buildSyntaxTree', tree)
 
-  let text = rollUpTree(tree)
-  return text
+  return rollUpTree(tree)
 }
 
 function toJS (data) {
