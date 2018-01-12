@@ -11,9 +11,9 @@ console.debug = (...args) => {
 
 module.exports = function (text, debug = false) {
   DEBUG = debug
-  let strings = text.split('\n')
+
   return new Promise((resolve, reject) => {
-    let tokens = buildTokens(strings)
+    let tokens = buildTokens(text)
     console.debug('buildTokens: ', tokens)
 
     let tree = buildSyntaxTree(tokens)

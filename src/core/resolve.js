@@ -1,16 +1,10 @@
 const StateMachine = require('./StateMachine')
 
-function start ({item, machine, store}) {
-  if (item === ' ' || item === '\t') {
-    store.tabs++
+function start (parameters) {
+  if (parameters.item === ' ' || parameters.item === '\t') {
+    parameters.store.tabs++
   } else {
-    store.current += item
-    if (item === '\'' || item === '\"' || item === '`') {
-      store.stringSymbol = item
-      return machine.push(str)
-    } else {
-      return machine.push(word)
-    }
+    main(parameters)
   }
 }
 
@@ -19,27 +13,34 @@ function main ({item, machine, store}) {
     store.current += item
     if (item === '\'' || item === '\"' || item === '`') {
       store.stringSymbol = item
-      return machine.push(str)
+      machine.push(inString)
     } else {
-      return machine.push(word)
+      machine.push(word)
     }
   }
 }
 
-function str ({item, machine, store}) {
+function inString ({item, machine, store}) {
   store.current += item
-  if (item === store.stringSymbol) {
+  if(item === '\\'){
+    machine.push(inStringAfterBackslash)
+  } else if (item === store.stringSymbol) {
     store.words.push(store.current)
     store.current = ''
-    return machine.push(main)
+    machine.push(main)
   }
+}
+
+function inStringAfterBackslash ({item, machine, store}) {
+  store.current += item
+  machine.pop()
 }
 
 function word ({item, machine, store}) {
   if (item === ' ') {
     store.words.push(store.current)
     store.current = ''
-    return machine.push(main)
+    machine.push(main)
   } else {
     store.current += item
   }

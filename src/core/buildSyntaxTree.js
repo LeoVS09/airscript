@@ -23,7 +23,7 @@ function value ({item: token, machine, store}) {
   }
 }
 
-function valueObject ({item: token, machine, store}) {
+function valueObject ({item: token, machine}) {
   if (token === constants.INCREASE_NESTING) {
     machine.push(valueObjectName)
   }
@@ -49,7 +49,7 @@ function valueObjectValue ({item: token, machine, store}) {
   machine.push(waitNextField)
 }
 
-function waitNextField ({item: token, machine, store}) {
+function waitNextField ({item: token, machine}) {
   if (token === constants.END_LINE) {
     machine.push(valueObjectName)
   }

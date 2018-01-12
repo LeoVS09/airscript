@@ -6,6 +6,7 @@ module.exports = class {
     this.store = store
   }
 
+  // May be use another type of state management
   learn (name, func) {
     this.store[name] = func
   }
@@ -29,5 +30,9 @@ module.exports = class {
 
   push (handler) {
     this.state.push(handler)
+  }
+
+  pop(){
+    this.state.pop()
   }
 }

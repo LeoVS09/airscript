@@ -1,5 +1,9 @@
 
 
 var ob
-    num 1
-    str "as a"
+    num 42
+    str "as \"a"
+    lol 'aga \'g'
+    cool true
+    float 3.45
+    inf -Infinity

@@ -19,14 +19,26 @@ const checks = [
   },
 
   function isNumber (value) {
-    if (Number.isInteger(+value)) {
-      return 'NUMBER'
+    if (/^(\-|\+)?([0-9]+)$/.test(value)) {
+      return 'INTEGER'
+    }
+    if (/^(\-|\+)?([0-9]+(\.[0-9]+)?)$/.test(value)){
+      return 'FLOAT'
+    }
+    if (/^(\-|\+)?(|Infinity)$/.test(value)){
+      return 'Infinity'
     }
   },
 
   function isString (value) {
     if (value[0] === '\'' || value[0] === '\"' || value[0] === '`\`') {
       return 'STRING'
+    }
+  },
+
+  function isBoolean(value) {
+    if(value === 'true' || value === 'false'){
+      return 'BOOLEAN'
     }
   },
 
@@ -51,11 +63,11 @@ function understand (value) {
 }
 
 
-module.exports = function (strings) {
+module.exports = function (text) {
   let tokens = []
   let lastTabs = 0
 
-  strings
+  text.split('\n')
     .map(resolve)
     .map(value => {
       console.debug('resolve: ', value)
@@ -67,17 +79,10 @@ module.exports = function (strings) {
         tokens.push(constants.INCREASE_NESTING)
       else if (tabs < lastTabs)
         tokens.push(constants.DECREASE_NESTING)
-
       lastTabs = tabs
 
-      words.forEach(word => {
-        let result = understand(word)
-        if (result)
-          tokens.push(result)
-        else {
-          console.error('Unexpected situation, don\'t know this word: ' + word)
-        }
-      })
+      let understood = words.map(understand)
+      tokens.push(...understood)
 
       tokens.push(constants.END_LINE)
     })
