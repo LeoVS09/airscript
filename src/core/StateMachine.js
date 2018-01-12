@@ -1,4 +1,4 @@
-module.exports = class StateMachine {
+module.exports = class {
 
   constructor (initialState, store, preHandler = (() => true)) {
     this.state = [initialState]

@@ -55,20 +55,19 @@ function waitNextField ({item: token, machine, store}) {
   }
 }
 
-module.exports =
-  function buildSyntaxTree (tokens) {
-    let store = {
-      tree: [],
-      branch: {},
-      current: {}
-    }
-
-    const builder = new StateMachine(main, store)
-    builder.work(tokens)
-
-    if (store.branch.key) {
-      store.tree.push(store.branch)
-    }
-
-    return store.tree
+module.exports = function (tokens) {
+  let store = {
+    tree: [],
+    branch: {},
+    current: {}
   }
+
+  const builder = new StateMachine(main, store)
+  builder.work(tokens)
+
+  if (store.branch.key) {
+    store.tree.push(store.branch)
+  }
+
+  return store.tree
+}

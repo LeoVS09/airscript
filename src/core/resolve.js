@@ -47,29 +47,28 @@ function word ({item, machine, store}) {
 }
 
 // parse string and find count tabs or spaces on start, all words, and empty bool
-module.exports =
-  function resolve (string) {
+module.exports = function (string) {
 
-    let store = {
-      words: [],
-      current: '',
-      tabs: 0,
-      isEmpty: true,
-      stringSymbol: ''
-    }
-
-    if (string.length === 0)
-      return store
-
-    const resolver = new StateMachine(start, store, ({item}) => item !== '\r')
-    resolver.work(string.split(''))
-
-    if (store.current.length !== 0) {
-      store.words.push(store.current)
-      store.current = ''
-    }
-
-    store.isEmpty = store.words.length === 0
-
-    return store
+  let store = {
+    words: [],
+    current: '',
+    tabs: 0,
+    isEmpty: true,
+    stringSymbol: ''
   }
+
+  if (string.length === 0)
+    return store
+
+  const resolver = new StateMachine(start, store, ({item}) => item !== '\r')
+  resolver.work(string.split(''))
+
+  if (store.current.length !== 0) {
+    store.words.push(store.current)
+    store.current = ''
+  }
+
+  store.isEmpty = store.words.length === 0
+
+  return store
+}
