@@ -1,0 +1,10 @@
+{
+  "source": {
+    "folder": "code",
+    "index": "index.air"
+  },
+  "target": {
+    "folder": "build",
+    "index": "index.js"
+  }
+}
