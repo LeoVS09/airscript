@@ -1,4 +1,4 @@
-const constants = require('./tokens')
+const constants = require('../tokens')
 const StateMachine = require('./StateMachine')
 
 function main ({item: token, machine, store}) {

@@ -2,9 +2,9 @@ module.exports = function (tree) {
   let result = ''
 
   for (let branch of tree) {
-    if(branch.key === "EMPTY"){
+    if(branch.token === "EMPTY"){
       result += "\n"
-    } else if (branch.key === 'VARIABLE') {
+    } else if (branch.token === 'VARIABLE') {
       if (branch.type === 'OBJECT') {
         result += 'let ' + branch.value + ' = {\n'
 
@@ -13,6 +13,8 @@ module.exports = function (tree) {
         })
 
         result += '}\n'
+      } else {
+        result += 'let name = ' + branch.value
       }
     }
   }

@@ -3,12 +3,13 @@ const {promisify} = require('util')
 const fs = require('fs')
 const path = require('path')
 const config = require('../config.json')
+const airSyntaxDefinitions = require('./SyntaxDefinitions/air')
 
 const readFileAsync = promisify(fs.readFile)
 const writeFileAsync = promisify(fs.writeFile)
 
 readFileAsync(path.resolve('./' + config.source.folder + '/' + config.source.index), 'utf8')
-  .then((text) => core(text, false))
+  .then((text) => core(text,airSyntaxDefinitions, true))
   .then(data => data.toJS())
   .then(text => {
     console.log(text)

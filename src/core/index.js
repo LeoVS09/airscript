@@ -1,7 +1,8 @@
 const parse = require('./parse')
 const buildSyntaxTree = require('./buildSyntaxTree')
 const treeToJS = require('./treeToJS')
-const buildTokens = require('./buildTokens')
+const TokensBuilder = require('./buildTokens')
+const syntaxTreeTranslateCompiler = require('./SyntaxTreeTranslateCompiler')
 
 let DEBUG = true
 
@@ -10,23 +11,39 @@ console.debug = (...args) => {
     console.log('[DEBUG] ', ...args)
 }
 
-module.exports = function (text, debug = false) {
+// Map array and decompose result arrays into one
+Array.prototype.mapMany = function (callback, thisArg) {
+  let res = []
+  this.map(callback, thisArg)
+    .forEach(array => {
+      res.push(...array)
+    })
+  return res
+}
+
+// Call callback function and return original array
+Array.prototype.process = function (callback) {
+  this.forEach(callback)
+  return this
+}
+
+module.exports = function (text, syntaxDefinitions, debug = false) {
   DEBUG = debug
 
+  let syntaxTreeTranslater = syntaxTreeTranslateCompiler(syntaxDefinitions)
+
   return new Promise((resolve, reject) => {
+    let tokensBuilder = new TokensBuilder()
 
-    let preprocessed = text.split('\n')
+    let parsed = text.split('\n')
       .map(parse)
-      .map(value => {
-        console.debug('parsed: ', value)
-        return value
-      })
+      .process(value => console.debug('Parsed: ', value))
+      .mapMany(tokensBuilder.build)
+      .process(value => console.debug('Build tokens: ', value))
+    syntaxTreeTranslater.work(parsed)
+    let tree = syntaxTreeTranslater.store.tree
 
-    let tokens = buildTokens(preprocessed)
-    console.debug('buildTokens: ', tokens)
-
-    let tree = buildSyntaxTree(tokens)
-    console.debug('buildSyntaxTree', tree)
+    console.debug('Tree: ', tree)
 
     resolve({
       toJS () {

@@ -1,13 +1,2 @@
 
-
-var ob
-    num 42
-    str "as \"a"
-    lol 'aga \'g'
-    cool true
-    float 3.45
-    inf -Infinity
-
-var aga
-    d 3
-    ghgh 3.5
+var ob 42

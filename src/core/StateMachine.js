@@ -1,43 +1,54 @@
-module.exports = class {
+class StateMachine {
 
   constructor (initialState, store, preHandler = (() => true)) {
-    this.state = [initialState]
+    this.stateHistory = [initialState]
     this.pre = preHandler
     this.store = store
   }
 
-  // May be use another type of state management
-  learn (name, func) {
-    this.store[name] = func
+  genHandlerArgs(item){
+    return {
+      item,
+      machine: this,
+      store: this.store
+    }
   }
 
   work (arr) {
     arr.forEach(item => {
-      let canWork = this.pre({
-        item,
-        machine: this,
-        store: this.store
-      })
+      let args = this.genHandlerArgs(item)
+      let canWork = this.pre(args)
       if (!canWork) {
         return
       }
-      this.top({
-        item,
-        machine: this,
-        store: this.store
-      })
+      this.top(args)
     })
   }
 
   top (arg) {
-    this.state[this.state.length - 1](arg)
+    let head = this.stateHistory[this.stateHistory.length - 1]
+    head(arg)
   }
 
   push (handler) {
-    this.state.push(handler)
+    this.stateHistory.push(handler)
   }
 
   pop(){
-    this.state.pop()
+    this.stateHistory.pop()
   }
 }
+
+class LearningStateMachine extends StateMachine{
+
+  constructor (initialState, store, preHandler) {
+    super(initialState, store, preHandler)
+    this.states = {}
+  }
+
+  learn (name, handler) {
+    this.states[name] = handler
+  }
+}
+
+module.exports = StateMachine

@@ -1,7 +1,0 @@
-
-module.exports = {
-  EMPTY_LINE: {key: "EMPTY_LINE"},
-  INCREASE_NESTING: {key: 'INCREASE_NESTING'},
-  DECREASE_NESTING: {key: 'DECREASE_NESTING'},
-  END_LINE: {key: 'END_LINE'}
-}
