@@ -1,10 +1,10 @@
 const constants = require('../tokens')
 const StateMachine = require('./StateMachine')
 
-function   test(key, item){
-  if (typeof key === 'string'){
+function test (key, item) {
+  if (typeof key === 'string') {
     return key === item
-  }else if (typeof key === 'object' && key.test) {
+  } else if (typeof key === 'object' && key.test) {
     return key.test(item)
   }
   return false
@@ -20,10 +20,11 @@ let createState = tokenName => ({item, machine, store, tokens}) => {
 const mainTokenList = [
   constants.VARIABLE
 ]
+
 function main ({item, machine, store, tokens}) {
-  for(let tokenName in tokens){
+  for (let tokenName in tokens) {
     let token = tokens[tokenName]
-    if(test(token.key, item)){
+    if (test(token.key, item)) {
       token.handler({item, machine, store})
       return
     }
@@ -36,18 +37,18 @@ class SyntaxTreeTranslater extends StateMachine {
     this.tokens = tokens
   }
 
-  genHandlerArgs(item){
+  genHandlerArgs (item) {
     return {
       ...super.genHandlerArgs(item),
       tokens: this.tokens
     }
   }
 
-  push(tokenName){
-    if(typeof tokenName === 'string') {
+  push (tokenName) {
+    if (typeof tokenName === 'string') {
       let token = this.tokens[tokenName]
       super.push(token.handler)
-    }else{
+    } else {
       super.push(tokenName)
     }
   }
@@ -64,20 +65,20 @@ module.exports = function (syntaxDefinitions) {
       nextStateDefiner = machine => {
         machine.push(defined.next)
       }
-    } else if(defined.maybe){
+    } else if (defined.maybe) {
       nextStateDefiner = machine => {
         machine.push(({item, machine, store, tokens}) => {
-          for(let tokenName in tokens){
+          for (let tokenName in tokens) {
             let token = tokens[tokenName]
 
-            if(test(token.key, item)){
+            if (test(token.key, item)) {
               token.handler({item, machine, store})
               return
             }
           }
         })
       }
-    }else{
+    } else {
       nextStateDefiner = machine => {
         machine.push(main)
       }
@@ -87,26 +88,42 @@ module.exports = function (syntaxDefinitions) {
       }
     }
 
+    let setter = (store, value) => {}
+
+    if (tokenName === constants.VARIABLE)
+      setter = (store, value) => {
+        store.branch.token = value
+      }
+    else if (tokenName === constants.VARIABLE_NAME)
+      setter = (store, value) => {
+        store.branch.name = value
+      }
+    else if (tokenName === constants.INTEGER) {
+      setter = (store, value) => {
+        store.branch.value = value
+      }
+    }
+
     let tokenDescription = {key: defined.key}
     if (defined.key) {
       if (typeof defined.key === 'string')
         tokenDescription.handler = ({machine, store}) => {
-          store.branch.token = tokenName
+          setter(store, tokenName)
           nextStateDefiner(machine)
         }
       else if (typeof defined.key === 'object' && defined.key.test) {
         tokenDescription.handler = ({item, machine, store}) => {
-          store.branch.value = item
+          setter(store, item)
           end(store)
           nextStateDefiner(machine)
         }
       }
-    }else{
+    } else {
       tokenDescription.handler = (({item, machine, store, tokens}) => {
-        for(let tokenName in tokens){
+        for (let tokenName in tokens) {
           let token = tokens[tokenName]
 
-          if(test(token.key, item)){
+          if (test(token.key, item)) {
             token.handler({item, machine, store})
             return
           }
@@ -122,7 +139,7 @@ module.exports = function (syntaxDefinitions) {
     branch: {}
   }
 
-  console.log("TOKENS: ", tokens)
+  console.log('TOKENS: ', tokens)
 
   return new SyntaxTreeTranslater(main, store, tokens)
 }

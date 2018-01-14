@@ -14,7 +14,7 @@ module.exports = function (tree) {
 
         result += '}\n'
       } else {
-        result += 'let name = ' + branch.value
+        result += `let ${branch.name} = ${branch.value}`
       }
     }
   }
