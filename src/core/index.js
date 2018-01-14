@@ -1,3 +1,4 @@
+const parse = require('./parse')
 const buildSyntaxTree = require('./buildSyntaxTree')
 const treeToJS = require('./treeToJS')
 const buildTokens = require('./buildTokens')
@@ -13,7 +14,15 @@ module.exports = function (text, debug = false) {
   DEBUG = debug
 
   return new Promise((resolve, reject) => {
-    let tokens = buildTokens(text)
+
+    let preprocessed = text.split('\n')
+      .map(parse)
+      .map(value => {
+        console.debug('parsed: ', value)
+        return value
+      })
+
+    let tokens = buildTokens(preprocessed)
     console.debug('buildTokens: ', tokens)
 
     let tree = buildSyntaxTree(tokens)

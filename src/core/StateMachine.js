@@ -13,9 +13,14 @@ module.exports = class {
 
   work (arr) {
     arr.forEach(item => {
-      if (!this.pre({item}))
+      let canWork = this.pre({
+        item,
+        machine: this,
+        store: this.store
+      })
+      if (!canWork) {
         return
-
+      }
       this.top({
         item,
         machine: this,

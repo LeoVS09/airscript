@@ -8,7 +8,7 @@ const readFileAsync = promisify(fs.readFile)
 const writeFileAsync = promisify(fs.writeFile)
 
 readFileAsync(path.resolve('./' + config.source.folder + '/' + config.source.index), 'utf8')
-  .then((text) => core(text, true))
+  .then((text) => core(text, false))
   .then(data => data.toJS())
   .then(text => {
     console.log(text)
