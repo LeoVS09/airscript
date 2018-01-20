@@ -1,4 +1,4 @@
-const StateMachine = require('./StateMachine')
+const {StateMachine} = require('./StateMachine')
 
 function start (parameters) {
   if (parameters.item === ' ' || parameters.item === '\t') {
@@ -22,7 +22,7 @@ function main ({item, machine, store}) {
 
 function inString ({item, machine, store}) {
   store.current += item
-  if(item === '\\'){
+  if (item === '\\') {
     machine.push(inStringAfterBackslash)
   } else if (item === store.stringSymbol) {
     store.words.push(store.current)

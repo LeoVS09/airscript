@@ -4,7 +4,7 @@ module.exports = function (tree) {
   for (let branch of tree) {
     if(branch.token === "EMPTY"){
       result += "\n"
-    } else if (branch.token === 'VARIABLE') {
+    } else if (branch.type === 'VARIABLE') {
       if (branch.type === 'OBJECT') {
         result += 'let ' + branch.value + ' = {\n'
 
@@ -14,7 +14,7 @@ module.exports = function (tree) {
 
         result += '}\n'
       } else {
-        result += `let ${branch.name} = ${branch.value}`
+        result += `let ${branch.data[0].item} = ${branch.data[1].item}\n`
       }
     }
   }

@@ -1,8 +1,8 @@
 const constants = require('../tokens')
-const StateMachine = require('./StateMachine')
+const {StateMachine} = require('./StateMachine')
 
 function main ({item: token, machine, store}) {
- if (token.key === 'VARIABLE') {
+  if (token.key === 'VARIABLE') {
     store.branch = {key: 'VARIABLE'}
     machine.push(variable)
   }
@@ -55,9 +55,9 @@ function waitNextField ({item: token, machine}) {
   }
 }
 
-function empty({item: token, store}){
+function empty ({item: token, store}) {
   if (token === constants.EMPTY_LINE) {
-    store.tree.push({ key: 'EMPTY' })
+    store.tree.push({key: 'EMPTY'})
     return false
   }
   return true

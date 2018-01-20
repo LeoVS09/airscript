@@ -6,34 +6,34 @@ module.exports = {
     next: tokens.VARIABLE_NAME
   },
   [tokens.VARIABLE_NAME]: {
-    key: /^w+$/,
+    key: /^\w+$/,
     next: tokens.VARIABLE_VALUE
   },
   [tokens.VARIABLE_VALUE]: {
     maybe: [
-      // tokens.STRING,
-      // tokens.INFINITY,
-      // tokens.BOOLEAN,
-      // tokens.FLOAT,
+      tokens.STRING,
+      tokens.INFINITY,
+      tokens.BOOLEAN,
+      tokens.FLOAT,
       tokens.INTEGER
       // tokens.OBJECT
     ]
   },
-  // [tokens.BOOLEAN]: {
-  //   key: /^(true|false)$/
-  // },
+  [tokens.BOOLEAN]: {
+    key: /^(true|false)$/
+  },
   [tokens.INTEGER]: {
     key: /^(\-|\+)?([0-9]+)$/,
+  },
+  [tokens.FLOAT]: {
+     key: /^(\-|\+)?([0-9]+(\.[0-9]+)?)$/,
+  },
+  [tokens.INFINITY]: {
+     key: /^(\-|\+)?(|Infinity)$/
+  },
+  [tokens.STRING]: {
+    key: /^(['"])(.*?)([^\\])\1/
   }
-  // [tokens.FLOAT]: {
-  //   key: /^(\-|\+)?([0-9]+(\.[0-9]+)?)$/,
-  // },
-  // [tokens.INFINITY]: {
-  //   key: /^(\-|\+)?(|Infinity)$/
-  // },
-  // [tokens.STRING]: {
-  //   key: /^(['"])(.*?)\1$/
-  // },
   // [tokens.OBJECT]: {
   //   before: [
   //     tokens.END_LINE,

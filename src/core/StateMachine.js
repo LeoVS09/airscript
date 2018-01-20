@@ -6,7 +6,7 @@ class StateMachine {
     this.store = store
   }
 
-  genHandlerArgs(item){
+  genHandlerArgs (item) {
     return {
       item,
       machine: this,
@@ -21,11 +21,11 @@ class StateMachine {
       if (!canWork) {
         return
       }
-      this.top(args)
+      this.handle(args)
     })
   }
 
-  top (arg) {
+  handle (arg) {
     let head = this.stateHistory[this.stateHistory.length - 1]
     head(arg)
   }
@@ -34,21 +34,39 @@ class StateMachine {
     this.stateHistory.push(handler)
   }
 
-  pop(){
+  pop () {
     this.stateHistory.pop()
   }
 }
 
-class LearningStateMachine extends StateMachine{
+class LearningStateMachine extends StateMachine {
 
   constructor (initialState, store, preHandler) {
     super(initialState, store, preHandler)
     this.states = {}
   }
 
-  learn (name, handler) {
+  on (name, handler) {
     this.states[name] = handler
   }
+
+  genHandlerArgs(args){
+    return {
+      ...super.genHandlerArgs(args),
+      states: this.states
+    }
+  }
+
+  nextState (name) {
+    let handler = this.states[name]
+    if(!handler){
+      throw new Error('This action not defined: ' + name)
+    }
+
+    console.log("Dispatch: ", name, this.store)
+    this.push(handler)
+  }
+
 }
 
-module.exports = StateMachine
+module.exports = {StateMachine, LearningStateMachine}

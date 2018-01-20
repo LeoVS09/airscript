@@ -1,2 +1,8 @@
+var ob -42
+var rol true
 
-var ob 42
+var tada -Infinity
+var pop 55.4
+
+var tada "eefe \"fe"
+var aga 'df \'dfdf'

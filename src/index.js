@@ -12,7 +12,7 @@ readFileAsync(path.resolve('./' + config.source.folder + '/' + config.source.ind
   .then((text) => core(text,airSyntaxDefinitions, true))
   .then(data => data.toJS())
   .then(text => {
-    console.log(text)
+    console.log("TEXT:\n", text)
     let buildFolder = path.resolve('./' + config.target.folder)
     return new Promise((resolve, reject) => {
       fs.stat(buildFolder, err => {
