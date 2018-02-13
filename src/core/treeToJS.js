@@ -14,7 +14,7 @@ module.exports = function (tree) {
 
         result += '}\n'
       } else {
-        result += `let ${branch.data[0].item} = ${branch.data[1].item}\n`
+        result += `let ${branch.data[0].item} = ${branch.data[1].item} // ${branch.data[1].type}\n`
       }
     }
   }

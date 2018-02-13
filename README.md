@@ -1,5 +1,5 @@
 # airscript
-simple js dialect 
+I Had Strings, But now i'm free...
 
 ## TODO
 + add type system

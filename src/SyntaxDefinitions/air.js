@@ -3,11 +3,13 @@ const tokens = require('../tokens')
 module.exports = {
   [tokens.VARIABLE]: {
     key: 'var',
-    next: tokens.VARIABLE_NAME
+    have: [
+      tokens.VARIABLE_NAME,
+      tokens.VARIABLE_VALUE
+      ]
   },
   [tokens.VARIABLE_NAME]: {
-    key: /^\w+$/,
-    next: tokens.VARIABLE_VALUE
+    key: /^\w+$/
   },
   [tokens.VARIABLE_VALUE]: {
     maybe: [
@@ -15,7 +17,7 @@ module.exports = {
       tokens.INFINITY,
       tokens.BOOLEAN,
       tokens.FLOAT,
-      tokens.INTEGER
+      tokens.INTEGER,
       // tokens.OBJECT
     ]
   },
@@ -26,14 +28,14 @@ module.exports = {
     key: /^(\-|\+)?([0-9]+)$/,
   },
   [tokens.FLOAT]: {
-     key: /^(\-|\+)?([0-9]+(\.[0-9]+)?)$/,
+     key: /^(\-|\+)?([0-9]+\.([0-9]+)?)$/,
   },
   [tokens.INFINITY]: {
      key: /^(\-|\+)?(|Infinity)$/
   },
   [tokens.STRING]: {
     key: /^(['"])(.*?)([^\\])\1/
-  }
+  },
   // [tokens.OBJECT]: {
   //   before: [
   //     tokens.END_LINE,

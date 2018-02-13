@@ -44,10 +44,35 @@ class LearningStateMachine extends StateMachine {
   constructor (initialState, store, preHandler) {
     super(initialState, store, preHandler)
     this.states = {}
+    this.patterns = {}
   }
 
   on (name, handler) {
     this.states[name] = handler
+  }
+
+  learn(token, pattern, callback){
+    this.patterns[token] = item => {
+      if(typeof pattern === 'function')
+        return pattern(this.genHandlerArgs(item))
+
+      if(this.test(pattern, item)) {
+        if(callback)
+          callback(this.genHandlerArgs(item))
+        return token
+      }
+
+      return false
+    }
+  }
+
+  isKnow(token, item){
+    let pattern = this.patterns[token]
+    if(!pattern){
+      throw new Error("Don't know this token: " + token)
+    }
+
+    return pattern(item)
   }
 
   genHandlerArgs(args){
@@ -65,6 +90,15 @@ class LearningStateMachine extends StateMachine {
 
     console.log("Dispatch: ", name, this.store)
     this.push(handler)
+  }
+
+  test (key, item) {
+    if (typeof key === 'string') {
+      return key === item
+    } else if (typeof key === 'object' && key.test) {
+      return key.test(item)
+    }
+    return false
   }
 
 }
