@@ -273,3 +273,128 @@ import add from 'some.air'
 
 console log 1 add 2 // 3
 ```
+
+### Error handling
+```air
+function sum ...nums
+    var result = 0
+    
+    for n of nums
+   
+        if n is not number
+            return fail
+            
+        result += n
+    
+    return result
+
+    
+console log sum 1, 2, 3 // 6
+
+const result = sum 1, 'x', 3
+    on fail 'Error handlet'
+
+console log result // Error handlet
+
+function sumAndMultiply operand ...nums
+    var result = sum ...nums
+        on fail
+            return 1
+     
+     return result * operand
+
+console log sumAndMultiply 2, 1, 'text', 3 // 1
+    
+        
+```
+```js
+function sum (...nums) {
+    let result = 0
+    
+    for n of nums {   
+        if n is not number
+            return { result: null, ok: false}
+            
+        result += n
+    }
+    
+    return { result, ok: true } 
+}
+
+    
+console.log(sum(1, 2, 3)) // 6
+
+const {result, ok} = sum( 1, 'x', 3)
+if(!ok)
+    result = 'Error handlet'
+
+console.log(result) // Error handlet
+
+function sumAndMultiply(operand, ...nums) {
+    var {result, ok} = sum(...nums)
+    if(!ok)
+        return 1
+     
+     return result * operand
+}
+
+console.log(sumAndMultiply(2, 1, 'text', 3)) // 1
+```
+
+### Pipes / Streams / Chanels
+```air
+
+readableFile -> writebleFile
+
+const arr = [1, 2, 3]
+var clone = []
+
+arr -> clone
+
+console log clone // [1, 2, 3]
+
+function displayNumber n
+    console log n
+
+arr -> displayNumber
+    // 1
+    // 2
+    // 3
+
+function increase x
+    return x + 1
+
+arr -> increase -> displayNumber
+    // 2
+    // 3
+    // 4
+
+```
+
+```js
+readableFile.pipe(writebleFile)
+
+const arr = [1, 2, 3]
+var clone = []
+
+arr.forEach(n => arr.push(n))
+
+console.log(clone) // [1, 2, 3]
+
+function displayNumber(n) {
+    console.log(n)
+}
+
+arr.forEach(n => displayNumber(n))
+    // 1
+    // 2
+    // 3
+    
+function increase(x) {
+    return x + 1    
+}
+
+arr
+    .map(x => increase(x))
+    .forEach(n => displayNumber(n))
+```
