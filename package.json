@@ -4,7 +4,7 @@
   "description": "Simple js dialect",
   "main": "index.js",
   "scripts": {
-    "test": "babel-node test/index.js",
+    "test": "babel-node --extensions \".js\",\".ts\" test/index.js",
     "clean": "del /s /q build",
     "build": "babel src -d dist"
   },
@@ -22,6 +22,7 @@
     "make-dir": "^1.3.0"
   },
   "devDependencies": {
+    "@types/node": "^10.12.15",
     "@babel/cli": "^7.2.0",
     "@babel/core": "^7.2.0",
     "@babel/node": "^7.2.0",

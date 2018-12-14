@@ -1,6 +1,7 @@
-const tokens = require('../tokens')
+import {constants as tokens} from '../core/tokens'
+import {syntaxTree} from '../core'
 
-module.exports = {
+const air: syntaxTree.SyntaxDefinitions = {
   [tokens.VARIABLE]: {
     key: 'var',
     have: [
@@ -52,3 +53,5 @@ module.exports = {
   //   like: tokens.VARIABLE_VALUE
   // }
 }
+
+export default air
