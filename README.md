@@ -7,6 +7,8 @@ I Had Strings, But now i'm free...
 + add type auto determination
 + add TypeScript support
 + add state machine declaration and usage
++ fix isKnow in StateMachine, better use tokens which not be strings
++ add end line characters
 ---
 ### Variables and object declaration
 ```air
