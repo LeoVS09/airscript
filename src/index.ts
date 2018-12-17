@@ -40,8 +40,8 @@ export default function build() {
       })
 }
 
-export async function airToJs(text: string){
-  const data = await core(text, airSyntaxDefinitions)
+export async function airToJs(text: string, debug?: boolean){
+  const data = await core(text, airSyntaxDefinitions, debug)
   return await data.toJS()
 }
 

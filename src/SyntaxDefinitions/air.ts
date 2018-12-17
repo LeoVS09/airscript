@@ -19,7 +19,8 @@ const air: syntaxTree.SyntaxDefinitions = {
       tokens.BOOLEAN,
       tokens.FLOAT,
       tokens.INTEGER,
-      // tokens.OBJECT
+      tokens.OBJECT,
+      //tokens.END_LINE
     ]
   },
   [tokens.BOOLEAN]: {
@@ -35,23 +36,28 @@ const air: syntaxTree.SyntaxDefinitions = {
      key: /^(\-|\+)?(|Infinity)$/
   },
   [tokens.STRING]: {
-    key: /^(['"])(.*?)([^\\])\1/
+    key: /^(['"])(.*?)([^\\]?)\1/
   },
-  // [tokens.OBJECT]: {
-  //   before: [
-  //     tokens.END_LINE,
-  //     tokens.INCREASE_NESTING
-  //   ],
-  //   next: tokens.OBJECT_FIELD_NAME,
-  //   end: tokens.DECREASE_NESTING
+  // [tokens.END_LINE]: {
+  //   key: tokens.END_LINE
   // },
-  // [tokens.OBJECT_FIELD_NAME]: {
-  //   like: tokens.VARIABLE_NAME,
-  //   next: tokens.OBJECT_FIELD_VALUE
-  // },
-  // [tokens.OBJECT_FIELD_VALUE]: {
-  //   like: tokens.VARIABLE_VALUE
-  // }
+  [tokens.OBJECT]: {
+    after: [
+      tokens.END_LINE,
+      tokens.INCREASE_NESTING
+    ],
+    have: [
+        tokens.OBJECT_FIELD_NAME,
+        tokens.OBJECT_FIELD_VALUE
+    ],
+    end: tokens.DECREASE_NESTING
+  },
+  [tokens.OBJECT_FIELD_NAME]: {
+    like: tokens.VARIABLE_NAME
+  },
+  [tokens.OBJECT_FIELD_VALUE]: {
+    like: tokens.VARIABLE_VALUE
+  }
 }
 
 export default air
