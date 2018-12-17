@@ -12,9 +12,12 @@ export default function (tree: Array<SyntaxBranch>) {
             }
 
             if(branch.tree[1].type === tokens.END_LINE) {
-                result += `let ${branch.tree[0].item}\n`
+                // TODO: more typesation
+                // @ts-ignore
+                result += `let ${branch.tree[0].item.value}\n`
             } else if(branch.tree[1].type === tokens.OBJECT) {
-                result += `let ${branch.tree[0].item} = {\n`
+                // @ts-ignore
+                result += `let ${branch.tree[0].item.value} = {\n`
 
                 if(!branch.tree[1].tree) {
                     throw new Error("OBJECT not have data tree")
@@ -22,29 +25,19 @@ export default function (tree: Array<SyntaxBranch>) {
 
                 branch.tree[1].tree.forEach(branch => {
                     if(branch.type === tokens.VARIABLE_NAME) {
-                        result += `\t${branch.item}: `
+                        // @ts-ignore
+                        result += `\t${branch.item.value}: `
                     } else {
-                        result += `${branch.item} // ${branch.type}\n`
+                        // @ts-ignore
+                        result += `${branch.item.value} // ${branch.type}\n`
                     }
                 })
 
                 result += '}\n'
             } else {
-                result += `let ${branch.tree[0].item} = ${branch.tree[1].item} // ${branch.tree[1].type}\n`
+                // @ts-ignore
+                result += `let ${branch.tree[0].item.value} = ${branch.tree[1].item.value} // ${branch.tree[1].type}\n`
             }
-        } else if (branch.type === 'OBJECT') {
-            result += 'let ' + branch.value + ' = {\n'
-            const {fields} = branch
-
-            if(!fields) {
-                throw new Error('Unexpected behavior: syntax branch object not hav fields')
-            }
-
-            fields.forEach((field, i) => {
-                result += '\t' + field.key + ': ' + field.value + (i != fields.length - 1 ? ',' : '') + '\n'
-            })
-
-            result += '}\n'
         }
 
     }

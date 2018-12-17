@@ -1,35 +1,51 @@
 import constants from './constants'
 import {Store} from "../parseLine";
 
-function understand<T>(value: T): T {
-    return value
+export interface WordToken<T> {
+    type: 'WORD'
+    value: T
+}
+
+export interface DefinedToken {
+    type: 'DEFINED',
+    value: string
+}
+
+function understandWord<T>(value: T): WordToken<T> {
+    return {
+        type: 'WORD',
+        value
+    }
+}
+
+function understandDefined(value: string): DefinedToken {
+    return {
+        type: "DEFINED",
+        value: value
+    }
 }
 
 export default class {
     lastTabs: number = 0
 
-    build = ({tabs, words, isEmpty}: Store) => {
-        let tokens: Array<string> = []
-
-        if (
-            isEmpty &&
-            tokens.length > 0 &&
-            tokens[tokens.length - 1] !== constants.EMPTY_LINE
-        ) {
-            tokens.push(constants.EMPTY_LINE)
-            return tokens
-        }
+    build = ({tabs, words, isEmpty}: Store): Array<DefinedToken | WordToken<string>> => {
+        let defined = new Array<string>()
 
         if (tabs > this.lastTabs)
-            tokens.push(constants.INCREASE_NESTING)
+            defined.push(constants.INCREASE_NESTING)
         else if (tabs < this.lastTabs)
-            tokens.push(constants.DECREASE_NESTING)
+            defined.push(constants.DECREASE_NESTING)
         this.lastTabs = tabs
 
-        let understood = words.map(understand)
-        tokens.push(...understood)
+        if (!defined.length && isEmpty) {
+            return [understandDefined(constants.EMPTY_LINE)]
+        }
 
-        tokens.push(constants.END_LINE)
+        let tokens: Array<DefinedToken | WordToken<string>> = defined.map(understandDefined)
+
+        tokens.push(...words.map(understandWord))
+
+        tokens.push(understandDefined(constants.END_LINE))
 
         return tokens
     }

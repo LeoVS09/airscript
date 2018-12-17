@@ -38,6 +38,9 @@ const air: syntaxTree.SyntaxDefinitions = {
   [tokens.STRING]: {
     key: /^(['"])(.*?)([^\\]?)\1/
   },
+  [tokens.EMPTY_LINE]: {
+    is: tokens.EMPTY_LINE
+  },
   // [tokens.END_LINE]: {
   //   key: tokens.END_LINE
   // },

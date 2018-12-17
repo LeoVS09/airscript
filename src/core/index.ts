@@ -15,7 +15,7 @@ export {
 }
 
 // Map array and decompose result arrays into one
-function mapMany<T, R> (arr: Array<T>, callback: (t:T) => Array<R>, thisArg?: any): Array<R> {
+function mapMany<T, R>(arr: Array<T>, callback: (t: T) => Array<R>, thisArg?: any): Array<R> {
     let res = [] as Array<R>
     arr.map(callback, thisArg)
         .forEach(array => {
@@ -40,21 +40,19 @@ export default function (text: string, syntaxDefinitions: syntaxTree.SyntaxDefin
             .map(parseLine);
         parsed.forEach(value => console.debug('Parsed: ', value))
 
-        let builded = mapMany(parsed, tokensBuilder.build)
-        builded.forEach(value => console.debug('Build tokens: ', value))
+        let tokenized = mapMany(parsed, tokensBuilder.build)
+        tokenized.forEach(value => console.debug('Build tokens: ', value))
 
-        syntaxTreeTranslator.work(builded)
+        syntaxTreeTranslator.work(tokenized)
         let tree = syntaxTreeTranslator.store.tree
 
         console.debug('Tree: ', tree)
 
         resolve({
-            toJS() {
-                return new Promise((resolve, reject) => {
-                    let text = treeToJS(tree)
-                    resolve(text)
-                })
-            }
+            toJS: () => new Promise((resolve, reject) => {
+                let text = treeToJS(tree)
+                resolve(text)
+            })
         })
     })
 }

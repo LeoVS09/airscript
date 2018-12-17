@@ -1,4 +1,5 @@
 import {constants as tokens} from './tokens'
+import {DefinedToken, WordToken} from "./tokens/build";
 
 export interface StateHandlerArgs<Store, Item> {
     item: Item,
@@ -65,43 +66,51 @@ export class StateMachine<Store, Item> {
     }
 }
 
-export interface LearningStates<Store, Item> {
-    [key: string]: LearningStateHandler<Store, Item>
+export type LearningItem = DefinedToken | WordToken<string>
+
+export interface LearningStates<Store> {
+    [key: string]: LearningStateHandler<Store>
 }
 
-export interface LearningPatterns<Store, Item> {
-    [key: string]: StateHandler<Store, Item>
+export interface LearningPatterns<Store> {
+    [key: string]: StateHandler<Store, LearningItem>
 }
 
-export interface LearningStateHandlerArgs<Store, Item> {
-    item: Item,
-    itemHistory: Array<Item>
-    machine: LearningStateMachine<Store, Item>,
+export interface LearningStateHandlerArgs<Store> {
+    item: LearningItem,
+    itemHistory: Array<LearningItem>
+    machine: LearningStateMachine<Store>,
     store: Store
-    states: LearningStates<Store, Item>
+    states: LearningStates<Store>
 }
 
-export interface LearningStateHandler<Store, Item> {
-    (args: LearningStateHandlerArgs<Store, Item>): void
+export interface LearningStateHandler<Store> {
+    (args: LearningStateHandlerArgs<Store>): void
 }
 
-export class LearningStateMachine<Store, Item> extends StateMachine<Store, Item> {
 
-    states: LearningStates<Store, Item> = {}
-    patterns: LearningPatterns<Store, Item> = {}
+export class LearningStateMachine<Store> extends StateMachine<Store, LearningItem>{
 
-    constructor(initialState: LearningStateHandler<Store, Item>, store: Store, beforeHandler?: BeforeHandler<Store, Item>) {
-        super(initialState as StateHandler<Store, Item>, store, beforeHandler)
+    states: LearningStates<Store> = {}
+    patterns: LearningPatterns<Store> = {}
+
+    constructor(initialState: LearningStateHandler<Store>, store: Store, beforeHandler?: BeforeHandler<Store, LearningItem>) {
+        super(initialState as StateHandler<Store, LearningItem>, store, beforeHandler)
     }
 
-    on(name: string, handler: LearningStateHandler<Store, Item>) {
+    on(name: string, handler: LearningStateHandler<Store>) {
         this.states[name] = handler
     }
 
-    learn(token: string, pattern: string | LearningStateHandler<Store, Item>, callback?: LearningStateHandler<Store, Item>): void {
-        this.patterns[token] = item => {
+    learn(token: string, pattern: string | LearningStateHandler<Store>, callback?: LearningStateHandler<Store>): void {
+        // @ts-ignore
+        this.patterns[token] = (item: DefinedToken | WordToken<string>) => {
             if (typeof pattern === 'function')
                 return pattern(this.genHandlerArgs(item))
+
+            if(item.type === "DEFINED") {
+                return false
+            }
 
             if (this.test(pattern, item)) {
                 if (callback)
@@ -115,11 +124,6 @@ export class LearningStateMachine<Store, Item> extends StateMachine<Store, Item>
 
     isKnow(token: string, item: any): any {
 
-        if(token === tokens.VARIABLE_NAME && (item === tokens.END_LINE || item === tokens.DECREASE_NESTING)) {
-            // TODO: fix
-            return false
-        }
-
         let pattern = this.patterns[token]
         if (!pattern) {
             throw new Error("Don't know this token: " + token)
@@ -128,7 +132,7 @@ export class LearningStateMachine<Store, Item> extends StateMachine<Store, Item>
         return pattern(item)
     }
 
-    genHandlerArgs(args: any): LearningStateHandlerArgs<Store, Item> {
+    genHandlerArgs(args: any): LearningStateHandlerArgs<Store> {
         return {
             ...super.genHandlerArgs(args),
             machine: this,
@@ -143,14 +147,14 @@ export class LearningStateMachine<Store, Item> extends StateMachine<Store, Item>
         }
 
         console.log("Dispatch: ", name, this.store)
-        this.push(handler as StateHandler<Store, Item>)
+        this.push(handler as StateHandler<Store, LearningItem>)
     }
 
-    test(key: string | { test: (a: any) => boolean }, item: any): boolean {
+    test(key: string | RegExp, item: DefinedToken | WordToken<string>): boolean {
         if (typeof key === 'string') {
-            return key === item
+            return key === item.value
         } else if (typeof key === 'object' && key.test) {
-            return key.test(item)
+            return key.test(item.value)
         }
         return false
     }
