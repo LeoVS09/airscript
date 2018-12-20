@@ -13,26 +13,17 @@ I Had Strings, But now i'm free...
 ### Variables and object declaration
 ```air
 // air
-var a
+var you "cool"
 
-var you = "cool"
-
-var alpha = true
+var alpha true
 
 var ob
-    num 1
-    str ""
-    
-// or
-var ob =
     num 1
     str ""
 ```
 
 ```js
 // js
-let a
-
 let you = "cool"
 
 let alpha = true
@@ -46,19 +37,30 @@ let ob = {
 ### Function declaration and usage
 ```air
 // air
-function display a b
+function display a then b
     console.log a b
 
-display 1 "lol"
+fucntion display a after b
+    console.log b a
+
+display 1 then "lol"
+
+display 1 after 2
 ```
 
 ```js
 // js
-function display(a, b) {
+function displayThen(a, b) {
   console.log(a,b)
 } 
 
-display(1, "lol")
+function displayAfter(a, b) {
+  console.log(b, a)
+}
+
+displayThen(1, "lol")
+
+displayAfter(1, 2)
 ```
 ---
 ### Promise and async
@@ -371,6 +373,14 @@ arr -> increase -> displayNumber
     // 3
     // 4
 
+
+function use stream
+    while true
+        const a, end <- stream
+        console log a
+        if end
+            break
+
 ```
 
 ```js
@@ -399,4 +409,14 @@ function increase(x) {
 arr
     .map(x => increase(x))
     .forEach(n => displayNumber(n))
+
+function use(stram) {
+    while(true) {
+      const [a, end] = yeld stream
+      console.log(a)
+      if(end){
+        break
+      }
+    }
+}
 ```
