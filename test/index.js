@@ -20,6 +20,10 @@ var ob
 var t 1    
 
 n = 1 + 2
+
+a = 3 - 1
+
+c = a - 3
 `
     let js = `
 let a = 1 // INTEGER

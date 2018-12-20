@@ -1,4 +1,6 @@
-var ob -42
+var a 3
+
+var n -42
 var rol true
 
 var tada -Infinity
@@ -6,3 +8,15 @@ var pop 55.4
 
 var tadada "eefe \"fe"
 var aga 'df \'dfdf'
+
+var ob
+    num 1
+    str ""
+
+var t 1
+
+n = 1 + 2
+
+a = 3 - 1
+
+c = a - 3

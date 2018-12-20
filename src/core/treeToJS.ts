@@ -82,7 +82,11 @@ function addItems(branch: SyntaxBranch): string {
     }
 
     if(!haveTree) {
-        result = " " + eval(result)
+        try {
+            result = " " + eval(result)
+        } catch (e) {
+            
+        }
     }
 
     return result
