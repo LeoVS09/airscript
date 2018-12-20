@@ -62,6 +62,7 @@ export class StateMachine<Store, Item> {
     }
 
     pop(): StateHandler<Store, Item> | undefined {
+        console.log('Learning pop')
         return this.stateHistory.pop()
     }
 }
@@ -72,8 +73,12 @@ export interface LearningStates<Store> {
     [key: string]: LearningStateHandler<Store>
 }
 
+export interface LearningPatternHandler<Store> {
+    (item: DefinedToken | WordToken<string>): string | false | any
+}
+
 export interface LearningPatterns<Store> {
-    [key: string]: StateHandler<Store, LearningItem>
+    [key: string]: LearningPatternHandler<Store>
 }
 
 export interface LearningStateHandlerArgs<Store> {
@@ -85,9 +90,8 @@ export interface LearningStateHandlerArgs<Store> {
 }
 
 export interface LearningStateHandler<Store> {
-    (args: LearningStateHandlerArgs<Store>): void
+    (args: LearningStateHandlerArgs<Store>): any
 }
-
 
 export class LearningStateMachine<Store> extends StateMachine<Store, LearningItem>{
 
@@ -103,7 +107,7 @@ export class LearningStateMachine<Store> extends StateMachine<Store, LearningIte
     }
 
     learn(token: string, pattern: string | LearningStateHandler<Store>, callback?: LearningStateHandler<Store>): void {
-        // @ts-ignore
+
         this.patterns[token] = (item: DefinedToken | WordToken<string>) => {
             if (typeof pattern === 'function')
                 return pattern(this.genHandlerArgs(item))

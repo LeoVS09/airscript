@@ -1,6 +1,9 @@
 import constants from './constants'
 import {Store} from "../parseLine";
 
+const WORD = 'WORD'
+const DEFINED = 'DEFINED'
+
 export interface WordToken<T> {
     type: 'WORD'
     value: T
@@ -13,16 +16,20 @@ export interface DefinedToken {
 
 function understandWord<T>(value: T): WordToken<T> {
     return {
-        type: 'WORD',
+        type: WORD,
         value
     }
 }
 
 function understandDefined(value: string): DefinedToken {
     return {
-        type: "DEFINED",
+        type: DEFINED,
         value: value
     }
+}
+
+export function isToken(item: WordToken<any> | DefinedToken): boolean {
+    return item.type === DEFINED
 }
 
 export default class {
@@ -34,7 +41,8 @@ export default class {
         if (tabs > this.lastTabs)
             defined.push(constants.INCREASE_NESTING)
         else if (tabs < this.lastTabs)
-            defined.push(constants.DECREASE_NESTING)
+            // Fix bug with var after object, TODO: refactor
+            defined.push(constants.DECREASE_NESTING, constants.END_LINE)
         this.lastTabs = tabs
 
         if (!defined.length && isEmpty) {

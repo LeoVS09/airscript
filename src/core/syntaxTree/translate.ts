@@ -1,21 +1,24 @@
-import {constants as tokens} from '../tokens'
+import {constants as tokens, isToken} from '../tokens'
 import {LearningStateMachine, LearningStateHandlerArgs, LearningStateHandler, LearningItem} from '../StateMachine'
 
 export interface SyntaxDefinitions {
     [token: number]: {
-        key?: string | RegExp | LearningStateHandler<SyntaxStore>,
-        have?: Array<string>,
-        maybe?: Array<string>,
+        key?: string | RegExp | LearningStateHandler<SyntaxStore>
+        have?: Array<string>
+        maybe?: Array<string>
         after?: Array<string>
-        next?: string,
+        next?: string
         end?: string
         like?: string
         is?: string
+        as: string
+        zeroOrMore?: Array<string>
+        oneOrMore?: Array<string>
     }
 }
 
 export interface SyntaxField {
-    key: string,
+    key: string
     value: string
 }
 
@@ -31,7 +34,7 @@ export interface SyntaxBranch {
 }
 
 export interface SyntaxStore {
-    tree: Array<SyntaxBranch>,
+    tree: Array<SyntaxBranch>
     branch: SyntaxBranch
 }
 
@@ -65,8 +68,15 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
             bot.learn(tokenName, defined.key as string)
         } else if(defined.is) {
             bot.learn(tokenName, ({item}: LearningStateHandlerArgs<SyntaxStore>) => {
-                if(item.type === 'DEFINED') {
+                if(isToken(item)) {
                     return item.value === defined.is
+                }
+                return false
+            })
+        } else if (defined.as) {
+            bot.learn(tokenName, ({item, machine}) => {
+                if(machine.isKnow(defined.as, item)) {
+                    return tokenName
                 }
                 return false
             })
@@ -74,6 +84,7 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
             let maybe = defined.maybe
 
             bot.learn(tokenName, ({machine, item}: LearningStateHandlerArgs<SyntaxStore>) => {
+                console.log(`[${tokenName}] maybe`, item.value)
                 for (let token of maybe) {
                     const result = machine.isKnow(token, item)
                     if (result) {
@@ -92,7 +103,7 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
             bot.learn(tokenName, ({item, itemHistory, machine, store}: LearningStateHandlerArgs<SyntaxStore>) => {
                 console.log(`[${tokenName}] learn item: ${item.value}`)
                 // TODO: refactor
-                if (item.type === "DEFINED" && lastAfter !== item.value) {
+                if (isToken(item) && lastAfter !== item.value) {
                     return false
                 }
 
@@ -100,7 +111,7 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
                     const historyItem = itemHistory[itemHistory.length - i - 1]
                     const afterItem = after[i]
 
-                    if (item.type === "DEFINED" && historyItem.value !== afterItem) {
+                    if (isToken(item) && historyItem.value !== afterItem) {
                         console.log(`[${tokenName}] expected ${afterItem}, but got ${historyItem}`, itemHistory)
                         return false
                     }
@@ -124,9 +135,9 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
                 return false
             })
 
-            const {have, end} = defined
-            if (!have) {
-                throw new Error(`[${tokenName}]Expected field "have" after field "after"`)
+            const {have, end, zeroOrMore, oneOrMore} = defined
+            if (!have && !zeroOrMore && !oneOrMore) {
+                throw new Error(`[${tokenName}]Expected one of field "have", "zeroOrMore", "oneOrMore" after field "after"`)
             }
 
             bot.on(tokenName as string, ({item, machine, store}: LearningStateHandlerArgs<SyntaxStore>) => {
@@ -139,11 +150,30 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
                 if (!branch.tree) {
                     throw new Error(`[${tokenName}] not have tree in branch inside`)
                 }
+                let result
 
-
-                let token = have[branch.tree.length % have.length]
-                console.log(`On [${tokenName}] have:`, have, 'token:', token, 'branch tree:', branch.tree)
-                let result = machine.isKnow(token, item)
+                if(have) {
+                    let token = have[branch.tree.length % have.length]
+                    console.log(`On [${tokenName}] have:`, have, 'token:', token, 'branch tree:', branch.tree)
+                    result = machine.isKnow(token, item)
+                } else if(zeroOrMore) {
+                    for(let token of zeroOrMore) {
+                        result = machine.isKnow(token, item)
+                        if(result){
+                            break
+                        }
+                    }
+                } else if(oneOrMore) {
+                    for(let token of oneOrMore) {
+                        result = machine.isKnow(token, item)
+                        if(result){
+                            break
+                        }
+                    }
+                    if(!result) {
+                        throw new Error(`[${tokenName}] Not have tokens when at least one required: ${item.value}`)
+                    }
+                }
 
                 if (result) {
                     branch.tree.push({
@@ -154,16 +184,20 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
                 }
 
                 if (end) {
-                    if (item.type === 'DEFINED' && item.value === end) {
+
+                    if (isToken(item) && item.value === end) {
+                        console.log('end', tokenName, 'item', item.value)
                         branch.end = true
                         machine.pop()
                     }
                     return
                 }
 
-                if (branch.tree.length >= have.length && branch.tree.every(x => !!x.end)) {
-                    branch.end = true
-                    machine.pop()
+                if(have) {
+                    if (branch.tree.length >= have.length && branch.tree.every(x => !!x.end)) {
+                        branch.end = true
+                        machine.pop()
+                    }
                 }
             })
 
@@ -172,12 +206,28 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
 
         if (defined.have) {
 
-            bot.learn(tokenName, defined.key as string, ({store, machine, item}: LearningStateHandlerArgs<SyntaxStore>) => {
-                store.branch = {
-                    type: tokenName,
-                    tree: []
-                }
-            })
+            if(defined.key) {
+                bot.learn(tokenName, defined.key as string, ({store, machine, item}: LearningStateHandlerArgs<SyntaxStore>) => {
+                    store.branch = {
+                        type: tokenName,
+                        tree: []
+                    }
+                })
+            }
+
+            if(defined.as) {
+                bot.learn(tokenName, ({store, item, machine}) => {
+                    if(machine.isKnow(defined.as, item)) {
+                        store.branch = {
+                            type: tokenName,
+                            item,
+                            tree: []
+                        }
+                        return tokenName
+                    }
+                    return false
+                })
+            }
 
             const {have} = defined
             bot.on(tokenName, ({store, machine, item}) => {
@@ -200,6 +250,7 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
                 }
 
                 if (store.branch.tree.length >= have.length && store.branch.tree.every(x => !!x.end)) {
+                    console.log("end", tokenName, 'on', item.value)
                     store.tree.push(store.branch)
                     store.branch = {tree: []}
                     machine.pop()
@@ -207,6 +258,82 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
 
             })
             continue
+        }
+
+        if(defined.zeroOrMore || defined.oneOrMore) {
+            let {zeroOrMore, oneOrMore, end} = defined
+            if(!end) {
+                throw new Error(`[${tokenName}] Await field "end" after field "zeroOrMore" or field "oneOrMore"`)
+            }
+
+            let more = zeroOrMore as string[]
+
+            if(oneOrMore){
+                more = oneOrMore
+            }
+
+            bot.learn(tokenName, (args) => {
+                const {store, machine, item} = args
+                console.log(`[${tokenName}] more`, item.value)
+
+                if(!store.branch.tree){
+                    store.branch.tree = []
+                }
+
+                store.branch.tree.push({
+                    type: tokenName,
+                    item,
+                    end: false,
+                    tree: []
+                })
+
+                machine.nextState(tokenName)
+
+                const state = machine.states[tokenName]
+
+                state(args)
+                return false
+            })
+
+            bot.on(tokenName, ({store, item, machine}) => {
+                console.log(`[${tokenName}] more state on`, item.value)
+                if(!store.branch.tree || !store.branch.tree.length){
+                    throw new Error(`[${tokenName}] Not have branch inside tree on "${item.value}"`)
+                }
+                let branch = store.branch.tree[store.branch.tree.length - 1]
+
+                let result
+                for(let token of more) {
+                    result = machine.isKnow(token, item)
+                    if(result){
+                        console.log(`[${tokenName}] more`, item.value, 'result', result)
+                        break
+                    }
+                }
+
+                if(oneOrMore && !result && (!branch.tree || !branch.tree.length)){
+                    throw new Error(`[${tokenName}] Not have tokens when at least one required: ${item.value}`)
+                }
+
+                if(!branch.tree){
+                    throw new Error(`[${tokenName}] Not have tree in current branch on "${item}"`)
+                }
+
+                if(result) {
+
+                    branch.tree.push({
+                        type: result,
+                        item,
+                        end: true
+                    })
+                }
+
+                if (isToken(item) && item.value === end) {
+                    console.log(`[${tokenName}] end state on`, item.value, 'where store', store)
+                    branch.end = true
+                    machine.pop()
+                }
+            })
         }
 
         if (defined.like) {
@@ -222,13 +349,29 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
 }
 
 function start({store, machine, item}: LearningStateHandlerArgs<SyntaxStore>) {
-    if (machine.isKnow(tokens.VARIABLE, item)) {
-        machine.nextState(tokens.VARIABLE)
-    } else if (machine.isKnow(tokens.EMPTY_LINE, item)) {
-        store.tree.push({
+    if (machine.isKnow(tokens.EMPTY_LINE, item)) {
+        return store.tree.push({
             token: tokens.EMPTY_LINE,
             item
         })
     }
+
+    if (machine.isKnow(tokens.VARIABLE, item)) {
+        console.log('isKnow', item, 'to', tokens.VARIABLE)
+        return machine.nextState(tokens.VARIABLE)
+    }
+
+    if(machine.isKnow(tokens.ACTION, item)) {
+        console.log('isKnow', item, 'to', tokens.ACTION)
+        return machine.nextState(tokens.ACTION)
+    }
+
+    if(machine.isKnow(tokens.FUNCTION_DEFINITION, item)) {
+        console.log('isKnow', item, 'to', tokens.FUNCTION_DEFINITION)
+        return machine.nextState(tokens.FUNCTION_DEFINITION)
+    }
+
+    console.error('[UNEXPECTED TOKEN]', item)
+
 }
 

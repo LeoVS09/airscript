@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "babel-node --extensions \".js\",\".ts\" test/index.js",
+    "test:watch": "babel-watch --extensions \".js\",\".ts\" test/index.js",
     "clean": "del /s /q build",
     "build": "babel src -d dist"
   },
@@ -22,7 +23,7 @@
     "make-dir": "^1.3.0"
   },
   "devDependencies": {
-    "@types/node": "^10.12.15",
+    "lodash": "^4.17.11",
     "@babel/cli": "^7.2.0",
     "@babel/core": "^7.2.0",
     "@babel/node": "^7.2.0",
@@ -39,6 +40,8 @@
     "@babel/preset-typescript": "^7.1.0",
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.2.0",
+    "@types/node": "^10.12.15",
+    "babel-watch": "https://github.com/monathur/babel-watch.git",
     "typescript": "^3.2.2"
   }
 }

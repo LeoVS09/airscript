@@ -38,9 +38,53 @@ export default function (tree: Array<SyntaxBranch>) {
                 // @ts-ignore
                 result += `let ${branch.tree[0].item.value} = ${branch.tree[1].item.value} // ${branch.tree[1].type}\n`
             }
+        } else if (branch.type === tokens.ACTION) {
+            const {item, tree} = branch
+            if(!item || !tree || !tree.length) {
+                throw new Error("Action not have item or tree")
+            }
+
+            result += `${item.value}`
+
+            result += addItems(branch)
+
+            result += '\n'
         }
 
     }
 
     return result
+}
+
+function addItems(branch: SyntaxBranch): string {
+    let result = ""
+
+    const {tree} = branch
+
+    if(!tree){
+        throw new Error("Not have tree when expected")
+    }
+
+    let haveTree = false
+
+    for(let i = 0; i < tree.length; i++) {
+        const data = tree[i]
+
+        if(data.tree){
+            result += addItems(data)
+            haveTree = true
+        } else {
+            if(!data.item){
+                throw new Error('Not have item when expected')
+            }
+            result += " " + data.item.value
+        }
+    }
+
+    if(!haveTree) {
+        result = " " + eval(result)
+    }
+
+    return result
+
 }

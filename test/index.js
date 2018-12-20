@@ -2,7 +2,7 @@ import {airToJs} from '../src'
 
 async function main () {
     let air = `
-var a 1
+var a 3
 
 var n -42
 var rol true
@@ -16,6 +16,10 @@ var aga 'df \\'dfdf'
 var ob
     num 1
     str "" 
+    
+var t 1    
+
+n = 1 + 2
 `
     let js = `
 let a = 1 // INTEGER
@@ -33,6 +37,10 @@ let ob = {
         num: 1 // INTEGER
         str: "" // STRING
 }
+
+var t 1
+
+var s = 1 + 2
 `
 
     const result = await airToJs(air, true)
