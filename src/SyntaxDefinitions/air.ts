@@ -131,11 +131,29 @@ const air: syntaxTree.SyntaxDefinitions = {
             tokens.INCREASE_NESTING
         ],
         zeroOrMore: [
+            tokens.CONSOLE,
             tokens.VARIABLE,
             tokens.OPERATION
         ],
         end: tokens.DECREASE_NESTING
     },
+
+    [tokens.PRE_DEFINED_FUNCTIONS]: {
+        maybe: [
+            tokens.CONSOLE
+        ]
+    },
+
+    [tokens.CONSOLE]: {
+        key: 'console',
+        have: [
+            tokens.CONSOLE_METHOD,
+            tokens.ACTION_BODY
+        ]
+    },
+    [tokens.CONSOLE_METHOD]: {
+        key: /^(log|debug|warn|error)$/
+    }
 
 
 

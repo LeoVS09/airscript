@@ -23,7 +23,12 @@ n = 1 + 2
 
 a = 3 - 1
 
-c = a - 3
+pop = a - 3
+
+console log "result:" ob
+
+console log 2 - 1
+
 `
     let js = `
 let a = 1 // INTEGER
@@ -44,7 +49,13 @@ let ob = {
 
 var t 1
 
-var s = 1 + 2
+n = 3
+
+a = 2
+
+pop = a - 3
+
+console.log(ob)
 `
 
     const result = await airToJs(air, true)

@@ -8,7 +8,8 @@
     "test:watch": "babel-watch --extensions \".js\",\".ts\" test/index.js",
     "clean": "del /s /q build",
     "build": "babel src -d dist",
-    "test:compile": "babel-node --extensions \".js\",\".ts\" compile.ts"
+    "compile": "babel-node --extensions \".js\",\".ts\" compile.ts",
+    "run-build": "babel-node build/index.js"
   },
   "repository": {
     "type": "git",

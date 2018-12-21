@@ -85,12 +85,14 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
 
             bot.learn(tokenName, ({machine, item}: LearningStateHandlerArgs<SyntaxStore>) => {
                 console.log(`[${tokenName}] maybe`, item.value)
+
                 for (let token of maybe) {
                     const result = machine.isKnow(token, item)
                     if (result) {
                         return result
                     }
                 }
+
                 return false
             })
         }
@@ -210,6 +212,7 @@ function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: Syntax
                 bot.learn(tokenName, defined.key as string, ({store, machine, item}: LearningStateHandlerArgs<SyntaxStore>) => {
                     store.branch = {
                         type: tokenName,
+                        item,
                         tree: []
                     }
                 })
@@ -356,9 +359,21 @@ function start({store, machine, item}: LearningStateHandlerArgs<SyntaxStore>) {
         })
     }
 
+    const preDefinedFunction = machine.isKnow(tokens.PRE_DEFINED_FUNCTIONS, item)
+
+    if(preDefinedFunction) {
+        console.log('isKnow', item, 'to', tokens.PRE_DEFINED_FUNCTIONS)
+        return machine.nextState(preDefinedFunction)
+    }
+
     if (machine.isKnow(tokens.VARIABLE, item)) {
         console.log('isKnow', item, 'to', tokens.VARIABLE)
         return machine.nextState(tokens.VARIABLE)
+    }
+
+    if(machine.isKnow(tokens.FUNCTION_DEFINITION, item)) {
+        console.log('isKnow', item, 'to', tokens.FUNCTION_DEFINITION)
+        return machine.nextState(tokens.FUNCTION_DEFINITION)
     }
 
     if(machine.isKnow(tokens.ACTION, item)) {
@@ -370,6 +385,8 @@ function start({store, machine, item}: LearningStateHandlerArgs<SyntaxStore>) {
         console.log('isKnow', item, 'to', tokens.FUNCTION_DEFINITION)
         return machine.nextState(tokens.FUNCTION_DEFINITION)
     }
+
+
 
     console.error('[UNEXPECTED TOKEN]', item)
 

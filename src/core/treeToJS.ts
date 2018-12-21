@@ -23,13 +23,13 @@ export default function (tree: Array<SyntaxBranch>) {
                     throw new Error("OBJECT not have data tree")
                 }
 
-                branch.tree[1].tree.forEach(branch => {
-                    if(branch.type === tokens.VARIABLE_NAME) {
+                branch.tree[1].tree.forEach((b, i) => {
+                    if(b.type === tokens.VARIABLE_NAME) {
                         // @ts-ignore
-                        result += `\t${branch.item.value}: `
+                        result += `\t${b.item.value}: `
                     } else {
                         // @ts-ignore
-                        result += `${branch.item.value} // ${branch.type}\n`
+                        result += `${b.item.value}${i !== branch.tree[1].tree.length - 1 ? ', ': ' ' }// ${b.type}\n`
                     }
                 })
 
@@ -49,6 +49,23 @@ export default function (tree: Array<SyntaxBranch>) {
             result += addItems(branch)
 
             result += '\n'
+        } else if (branch.type === tokens.CONSOLE) {
+            const {item, tree} = branch
+            if(!item || !tree || !tree.length) {
+                throw new Error("Console not have item or tree")
+            }
+
+            const method = tree[0].item
+            if(!method) {
+                throw new Error("Console not have method")
+            }
+            
+            
+            result += `${item.value}.${method.value}(`
+
+            result += addItems(tree[1]).split(' ').slice(1).join(', ')
+
+            result += ')\n'
         }
 
     }
