@@ -1,5 +1,5 @@
 import build from './build'
-import compileTranslator, {SyntaxDefinitions} from './translate'
+import compileTranslator, {SyntaxDefinitions} from './learning'
 
 export {
     build,

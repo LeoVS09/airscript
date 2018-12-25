@@ -154,9 +154,6 @@ const air: syntaxTree.SyntaxDefinitions = {
     [tokens.CONSOLE_METHOD]: {
         key: /^(log|debug|warn|error)$/
     }
-
-
-
 }
 
 export default air

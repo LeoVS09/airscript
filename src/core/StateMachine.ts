@@ -106,7 +106,7 @@ export class LearningStateMachine<Store> extends StateMachine<Store, LearningIte
         this.states[name] = handler
     }
 
-    learn(token: string, pattern: string | LearningStateHandler<Store>, callback?: LearningStateHandler<Store>): void {
+    learn(token: string, pattern: string | RegExp | LearningStateHandler<Store>, callback?: LearningStateHandler<Store>): void {
 
         this.patterns[token] = (item: DefinedToken | WordToken<string>) => {
             if (typeof pattern === 'function')
