@@ -1,6 +1,6 @@
-import {LearningStateMachine} from "../../stateMachine";
-import {SyntaxDefinitions, SyntaxStore} from "./types";
-import {isToken} from "../../tokens";
+import {LearningStateMachine} from "../../../stateMachine";
+import {SyntaxDefinitions, SyntaxStore} from "../types";
+import {isToken} from "../../../tokens";
 
 export default function (tokenName: string, bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: SyntaxDefinitions) {
     const defined = syntaxDefinitions[tokenName]

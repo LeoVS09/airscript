@@ -1,5 +1,5 @@
-import {LearningStateHandlerArgs, LearningStateMachine} from "../../stateMachine";
-import {SyntaxDefinitions, SyntaxStore} from "./types";
+import {LearningStateHandlerArgs, LearningStateMachine} from "../../../stateMachine";
+import {SyntaxDefinitions, SyntaxStore} from "../types";
 
 export default function (tokenName: string, bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: SyntaxDefinitions) {
     let defined = syntaxDefinitions[tokenName]

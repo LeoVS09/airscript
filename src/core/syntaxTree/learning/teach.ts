@@ -1,9 +1,11 @@
 import {LearningStateMachine} from "../../stateMachine";
 import { SyntaxDefinitions, SyntaxDefinitionType, SyntaxStore, tokenType} from "./types";
-import learnKeys from './learnKeys'
-import learnAfter from "./learnAfter";
-import learnHave from "./learnHave";
-import learnOrMore from "./learnOrMore";
+import {
+    learnOrMore,
+    learnHave,
+    learnKeys,
+    learnAfter
+} from './learn'
 
 export function teach(bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: SyntaxDefinitions) {
 

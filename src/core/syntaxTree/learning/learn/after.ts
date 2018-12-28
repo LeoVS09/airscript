@@ -1,7 +1,7 @@
-import {LearningStateHandlerArgs, LearningStateMachine} from "../../stateMachine";
-import {SyntaxDefinitions, SyntaxStore} from "./types";
-import {isToken} from "../../tokens";
-import {getLastStoreItem, getLastTreeItem, pushToStore} from "./store";
+import {LearningStateHandlerArgs, LearningStateMachine} from "../../../stateMachine";
+import {SyntaxDefinitions, SyntaxStore} from "../types";
+import {isToken} from "../../../tokens";
+import {getLastStoreItem, getLastTreeItem, pushToStore} from "../store";
 
 export default function (tokenName: string, bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: SyntaxDefinitions) {
     let defined = syntaxDefinitions[tokenName]
