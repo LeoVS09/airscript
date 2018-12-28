@@ -40,7 +40,7 @@ let ob = {
 function display a then b
     console.log a b
 
-fucntion display a after b
+function display a after b
     console.log b a
 
 display 1 then "lol"
