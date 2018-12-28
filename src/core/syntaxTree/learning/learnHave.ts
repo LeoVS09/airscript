@@ -1,4 +1,4 @@
-import {LearningStateHandlerArgs, LearningStateMachine} from "../../StateMachine";
+import {LearningStateHandlerArgs, LearningStateMachine} from "../../stateMachine";
 import {SyntaxDefinitions, SyntaxStore} from "./types";
 
 export default function (tokenName: string, bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: SyntaxDefinitions) {
@@ -10,23 +10,25 @@ export default function (tokenName: string, bot: LearningStateMachine<SyntaxStor
     }
 
     if(key) {
-        bot.learn(tokenName, key, ({store, machine, item}: LearningStateHandlerArgs<SyntaxStore>) => {
-            store.branch = {
+        bot.learn(tokenName, key, ({branch, machine, item}: LearningStateHandlerArgs<SyntaxStore>) => {
+            Object.assign(branch, {
                 type: tokenName,
                 item,
-                tree: []
-            }
+                tree: [],
+                end: false
+            })
         })
     }
 
     if(as) {
-        bot.learn(tokenName, ({store, item, machine}) => {
+        bot.learn(tokenName, ({branch, item, machine}) => {
             if(machine.isKnow(as, item)) {
-                store.branch = {
+                Object.assign(branch, {
                     type: tokenName,
                     item,
-                    tree: []
-                }
+                    tree: [],
+                    end: false
+                })
                 return tokenName
             }
             return false
@@ -34,29 +36,30 @@ export default function (tokenName: string, bot: LearningStateMachine<SyntaxStor
     }
 
 
-    bot.on(tokenName, ({store, machine, item}) => {
-        if (!store.branch.tree) {
+    bot.on(tokenName, ({branch, machine, item}) => {
+        if (!branch.tree) {
             throw new Error(`[${tokenName}] not have tree in current branch`)
         }
 
-        let token = have[store.branch.tree.length]
+        let token = have[branch.tree.length]
         if (token) {
             let result = machine.isKnow(token, item)
             console.log(`[${tokenName}] isKnow token: ${token}, item: ${item.value}, result: ${result}`)
 
             if (result) {
-                store.branch.tree.push({
+                branch.tree.push({
                     type: result,
                     item,
                     end: true
                 })
+
+                console.log(`[${tokenName}] branch`, branch)
             }
         }
 
-        if (store.branch.tree.length >= have.length && store.branch.tree.every(x => !!x.end)) {
-            console.log("end", tokenName, 'on', item.value)
-            store.tree.push(store.branch)
-            store.branch = {tree: []}
+        if (branch.tree.length >= have.length && branch.tree.every(x => !!x.end)) {
+            console.log("end", tokenName, 'on', item.value, 'branch', branch)
+            branch.end = true
             machine.pop()
         }
 

@@ -1,6 +1,7 @@
-import {LearningStateHandlerArgs, LearningStateMachine} from "../../StateMachine";
+import {LearningStateHandlerArgs, LearningStateMachine} from "../../stateMachine";
 import {SyntaxDefinitions, SyntaxStore} from "./types";
 import {isToken} from "../../tokens";
+import {getLastStoreItem, getLastTreeItem, pushToStore} from "./store";
 
 export default function (tokenName: string, bot: LearningStateMachine<SyntaxStore>, syntaxDefinitions: SyntaxDefinitions) {
     let defined = syntaxDefinitions[tokenName]
@@ -13,7 +14,7 @@ export default function (tokenName: string, bot: LearningStateMachine<SyntaxStor
     const lastAfter = after.pop()
     const reversedAfter = after.reverse()
 
-    bot.learn(tokenName, ({item, itemHistory, machine, store}: LearningStateHandlerArgs<SyntaxStore>) => {
+    bot.learn(tokenName, ({item, itemHistory, machine, branch}: LearningStateHandlerArgs<SyntaxStore>) => {
         console.log(`[${tokenName}] learn item: ${item.value}`)
         // TODO: refactor
         if (isToken(item) && lastAfter !== item.value) {
@@ -32,34 +33,32 @@ export default function (tokenName: string, bot: LearningStateMachine<SyntaxStor
 
         console.log(`[${tokenName}] learn item: ${item.value} - ok`)
 
-        if (!store.branch.tree) {
-            throw new Error(`[${tokenName}] not have tree in current branch`)
-        }
-
-        store.branch.tree.push({
+        const newBranch = {
             type: tokenName,
             item,
             tree: [],
             end: false
-        })
+        }
 
-        machine.nextState(tokenName as string)
+        if(branch.item && branch.tree){
+            branch.tree.push(newBranch)
+        } else {
+            Object.assign(branch, newBranch)
+        }
+
+        machine.nextState(tokenName)
 
         return false
     })
 
     const {have, end, zeroOrMore, oneOrMore} = defined
     if (!have && !zeroOrMore && !oneOrMore) {
-        throw new Error(`[${tokenName}]Expected one of field "have", "zeroOrMore", "oneOrMore" after field "after"`)
+        throw new Error(`[${tokenName}] Expected one of field "have", "zeroOrMore", "oneOrMore" after field "after"`)
     }
 
-    bot.on(tokenName as string, ({item, machine, store}: LearningStateHandlerArgs<SyntaxStore>) => {
+    bot.on(tokenName, ({item, machine, branch}: LearningStateHandlerArgs<SyntaxStore>) => {
         console.log(`On [${tokenName}] item: ${item.value}`)
-        if (!store.branch.tree) {
-            throw new Error(`[${tokenName}] not have tree in current branch`)
-        }
 
-        let branch = store.branch.tree[store.branch.tree.length - 1]
         if (!branch.tree) {
             throw new Error(`[${tokenName}] not have tree in branch inside`)
         }

@@ -1,4 +1,4 @@
-import {LearningStateHandlerArgs, LearningStateMachine} from "../../StateMachine";
+import {LearningStateHandlerArgs, LearningStateMachine} from "../../stateMachine";
 import {SyntaxDefinitions, SyntaxStore} from "./types";
 import {isToken} from "../../tokens";
 

@@ -1,75 +1,12 @@
-import {constants as tokens} from './tokens'
-import {DefinedToken, WordToken} from "./tokens/build";
+import {DefinedToken, WordToken} from "../tokens/build";
+import {SyntaxBranch, SyntaxStore} from "../syntaxTree/learning/types";
+import {getLastStoreItem, getLastTreeItem} from "../syntaxTree/learning/store";
+import {BeforeHandler, StateHandler, StateMachine} from "./base";
 
-export interface StateHandlerArgs<Store, Item> {
-    item: Item,
-    itemHistory: Array<Item>
-    machine: StateMachine<Store, Item>
-    store: Store
-}
-
-export interface StateHandler<Store, Item> {
-    (args: StateHandlerArgs<Store, Item>): void
-}
-
-export interface BeforeHandler<Store, Item> {
-    (args: StateHandlerArgs<Store, Item>): boolean
-}
-
-export class StateMachine<Store, Item> {
-
-    stateHistory: Array<StateHandler<Store, Item>>
-    store: Store
-    before: (args: StateHandlerArgs<Store, Item>) => boolean
-    itemHistory: Array<Item> = []
-
-    constructor(initialState: StateHandler<Store, Item>, store: Store, beforeHandler: BeforeHandler<Store, Item> = (() => true)) {
-        this.stateHistory = [initialState]
-        this.before = beforeHandler
-        this.store = store
-    }
-
-    genHandlerArgs(item: any): StateHandlerArgs<Store, Item> {
-        return {
-            item,
-            itemHistory: this.itemHistory,
-            machine: this,
-            store: this.store
-        }
-    }
-
-    work(arr: Array<any>): void {
-        arr.forEach(item => {
-            let args = this.genHandlerArgs(item)
-
-            let canWork = this.before(args)
-            if (!canWork) {
-                return
-            }
-
-            this.handle(args)
-            this.itemHistory.push(item)
-        })
-    }
-
-    handle(arg: StateHandlerArgs<Store, Item>) {
-        let head = this.stateHistory[this.stateHistory.length - 1]
-        head(arg)
-    }
-
-    push(handler: StateHandler<Store, Item>) {
-        this.stateHistory.push(handler)
-    }
-
-    pop(): StateHandler<Store, Item> | undefined {
-        console.log('Learning pop')
-        return this.stateHistory.pop()
-    }
-}
 
 export type LearningItem = DefinedToken | WordToken<string>
 
-export interface LearningStates<Store> {
+export interface LearningStates<Store extends SyntaxStore> {
     [key: string]: LearningStateHandler<Store>
 }
 
@@ -81,19 +18,20 @@ export interface LearningPatterns<Store> {
     [key: string]: LearningPatternHandler<Store>
 }
 
-export interface LearningStateHandlerArgs<Store> {
+export interface LearningStateHandlerArgs<Store extends SyntaxStore> {
     item: LearningItem,
     itemHistory: Array<LearningItem>
     machine: LearningStateMachine<Store>,
-    store: Store
+    store: Store,
+    branch: SyntaxBranch
     states: LearningStates<Store>
 }
 
-export interface LearningStateHandler<Store> {
+export interface LearningStateHandler<Store extends SyntaxStore> {
     (args: LearningStateHandlerArgs<Store>): any
 }
 
-export class LearningStateMachine<Store> extends StateMachine<Store, LearningItem>{
+export class LearningStateMachine<Store extends SyntaxStore> extends StateMachine<Store, LearningItem>{
 
     states: LearningStates<Store> = {}
     patterns: LearningPatterns<Store> = {}
@@ -137,10 +75,35 @@ export class LearningStateMachine<Store> extends StateMachine<Store, LearningIte
     }
 
     genHandlerArgs(args: any): LearningStateHandlerArgs<Store> {
+
+        if(!this.store.branch) {
+            this.store.branch = {
+                end: false
+            }
+        }
+
+        // TODO: refactor typings
+        if(!this.store.tree) {
+            this.store.tree = []
+        }
+
+        // TODO: Pushing must be after learn and handler action
+        if(this.store.branch.end) {
+            this.store.tree.push(this.store.branch)
+            this.store.branch = {
+                end: false
+            }
+        }
+
+        const branch = getLastStoreItem(this.store)
+
+        //console.log('[genHandlerArgs] item', args, '\nstore', this.store, '\nbranch', branch)
+
         return {
             ...super.genHandlerArgs(args),
             machine: this,
-            states: this.states
+            states: this.states,
+            branch
         }
     }
 

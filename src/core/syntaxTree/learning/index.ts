@@ -1,4 +1,4 @@
-import {LearningStateMachine} from "../../StateMachine";
+import {LearningStateMachine} from "../../stateMachine";
 import {SyntaxDefinitions, SyntaxDefinitionObject, SyntaxStore} from "./types";
 import {createStore} from "./store";
 import {main} from "./mainState";

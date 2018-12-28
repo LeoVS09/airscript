@@ -1,4 +1,18 @@
 import {airToJs} from '../src'
+import * as fs from 'fs'
+import * as util from 'util'
+
+// const out = fs.createWriteStream(__dirname + '/node.out.log' )
+// const error = fs.createWriteStream(__dirname + '/node.error.log')
+//
+// console.log = (...args) => {
+//     out.write(util.format(...args) + '\n')
+// }
+//
+// console.error = (...args) => {
+//     out.write(util.format(...args) + '\n')
+// }
+
 
 async function main () {
     let air = `

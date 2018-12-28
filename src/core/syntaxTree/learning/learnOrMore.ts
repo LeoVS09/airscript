@@ -1,4 +1,4 @@
-import {LearningStateMachine} from "../../StateMachine";
+import {LearningStateMachine} from "../../stateMachine";
 import {SyntaxDefinitions, SyntaxStore} from "./types";
 import {isToken} from "../../tokens";
 
@@ -21,34 +21,34 @@ export default function (tokenName: string, bot: LearningStateMachine<SyntaxStor
     }
 
     bot.learn(tokenName, (args) => {
-        const {store, machine, item} = args
+        const {branch, machine, item} = args
         console.log(`[${tokenName}] more`, item.value)
 
-        if(!store.branch.tree){
-            store.branch.tree = []
+        const newBranch = {
+            type: tokenName,
+            tree: [],
+            end: false
         }
 
-        store.branch.tree.push({
-            type: tokenName,
-            item,
-            end: false,
-            tree: []
-        })
+        if(branch.item && branch.tree) {
+            branch.tree.push(newBranch)
+        } else {
+            Object.assign(branch, newBranch)
+        }
 
         machine.nextState(tokenName)
 
         const state = machine.states[tokenName]
 
-        state(args)
+        state({ ...args, branch: newBranch })
         return false
     })
 
-    bot.on(tokenName, ({store, item, machine}) => {
+    bot.on(tokenName, ({branch, item, machine}) => {
         console.log(`[${tokenName}] more state on`, item.value)
-        if(!store.branch.tree || !store.branch.tree.length){
-            throw new Error(`[${tokenName}] Not have branch inside tree on "${item.value}"`)
+        if(!branch.tree){
+            throw new Error(`[${tokenName}] Not have tree on "${item.value}"`)
         }
-        let branch = store.branch.tree[store.branch.tree.length - 1]
 
         let result
         for(let token of more) {
@@ -77,7 +77,7 @@ export default function (tokenName: string, bot: LearningStateMachine<SyntaxStor
         }
 
         if (isToken(item) && item.value === end) {
-            console.log(`[${tokenName}] end state on`, item.value, 'where store', store)
+            console.log(`[${tokenName}] end state on`, item.value, 'where store', branch)
             branch.end = true
             machine.pop()
         }

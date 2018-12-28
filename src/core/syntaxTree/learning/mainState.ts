@@ -1,12 +1,16 @@
-import {LearningStateHandlerArgs} from "../../StateMachine";
+import {LearningStateHandlerArgs} from "../../stateMachine";
 import {constants as tokens} from "../../tokens";
 import {SyntaxStore} from "./types";
 
 export function main({store, machine, item}: LearningStateHandlerArgs<SyntaxStore>) {
     if (machine.isKnow(tokens.EMPTY_LINE, item)) {
+        if(!store.tree) {
+            store.tree = []
+        }
         return store.tree.push({
             token: tokens.EMPTY_LINE,
-            item
+            item,
+            end: true
         })
     }
 

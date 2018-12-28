@@ -1,4 +1,4 @@
-import {LearningItem, LearningStateHandler} from "../../StateMachine";
+import {LearningItem, LearningStateHandler} from "../../stateMachine";
 
 export enum SyntaxDefinitionType {
     AFTER = 'AFTER',
@@ -23,6 +23,22 @@ export interface SyntaxDefinitionObject {
 
 export interface SyntaxDefinitions {
     [token: string]: SyntaxDefinitionObject
+}
+
+export function tokenType(defined: SyntaxDefinitionObject): SyntaxDefinitionType {
+    if(defined.after) {
+        return SyntaxDefinitionType.AFTER
+    }
+
+    if(defined.have) {
+        return SyntaxDefinitionType.HAVE
+    }
+
+    if(defined.zeroOrMore || defined.oneOrMore) {
+        return SyntaxDefinitionType.OR_MORE
+    }
+
+    return SyntaxDefinitionType.OTHER
 }
 
 export interface SyntaxField {

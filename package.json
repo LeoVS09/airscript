@@ -4,7 +4,7 @@
   "description": "Simple js dialect",
   "main": "index.js",
   "scripts": {
-    "test": "babel-node --extensions \".js\",\".ts\" test/index.js",
+    "test": "babel-node --extensions \".js\",\".ts\" test/index.js --expose-debug-as=v8debug",
     "test:watch": "babel-watch --extensions \".js\",\".ts\" test/index.js",
     "clean": "del /s /q build",
     "build": "babel src -d dist",
